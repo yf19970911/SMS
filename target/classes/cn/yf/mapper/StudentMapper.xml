@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yf.mapper.StudentMapper">
+
+    <insert id="addStudent" parameterType="Student">
+        insert into student values(null,#{name},#{sex},#{birth},#{schoolday},#{marjor_id},#{college_id})
+    </insert>
+
+    <delete id="deleteStudent" parameterType="int">
+        delete from student where id = #{id}
+    </delete>
+
+    <update id="updateStudent">
+        update student set name=#{student.name},sex=#{student.sex},birth=#{student.birth},schoolday=#{student.schoolday},marjor_id=#{student.marjor_id},college_id=#{student.college_id} where id = #{id}
+    </update>
+
+    <select id="queryAllStudent" resultType="Student">
+        select * from student
+    </select>
+
+    <select id="queryStudentById" resultType="Student">
+        select * from student where id = #{id}
+    </select>
+
+    <select id="queryStudentByName" resultType="Student">
+        select * from student where name = #{name}
+    </select>
+
+    <select id="QueryAll" resultType="int">
+        select count(*) from student
+    </select>
+
+    <select id="queryCurrentPage" resultType="Student">
+        <bind name="fuck" value="(currentPage-1)*pageSize"></bind>
+        SELECT * FROM STUDENT LIMIT #{fuck},#{pageSize}
+    </select>
+
+</mapper>
+
+<!--(currentPage-1)*pageSize-->

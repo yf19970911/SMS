@@ -1,0 +1,13 @@
+#top{
+    height: 100px;
+    background-color: rgba(248,248,248);
+}
+#top_left{
+    float: left;
+    margin-top: 20px;
+}
+#top_right{
+    float: right;
+    margin-top: 20px;
+    margin-right: 70px;
+}

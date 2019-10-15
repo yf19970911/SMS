@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="
+     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+     http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+     http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!--Spring的配置文件，这里主要配置和业务逻辑相关的-->
+
+    <!--扫描Service层注解-->
+    <context:component-scan base-package="cn.yf.service.impl"/>
+
+    <!--加载数据库配置文件-->
+    <context:property-placeholder location="classpath:db.properties"/>
+
+    <!--c3po数据库连接池-->
+    <bean id="pooledDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${mysql.driver}"/>
+        <property name="jdbcUrl" value="${mysql.url}"/>
+        <property name="user" value="${mysql.username}"/>
+        <property name="password" value="${mysql.password}"/>
+    </bean>
+
+    <!--Spring和Mybatis的整合-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--配置Mybatis全局配置文件的位置-->
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+        <!--指定数据源-->
+        <property name="dataSource" ref="pooledDataSource"/>
+    </bean>
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" >
+        <property name="basePackage" value="cn.yf.mapper"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+    <!--事务控制器
+        对mybatis操作数据库事务控制，spring使用jdbc的事务控制类
+    -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="pooledDataSource" />
+    </bean>
+
+    <!--通知-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <!--传播行为-->
+            <tx:method name="save*" propagation="REQUIRED"/>
+            <tx:method name="delete*" propagation="REQUIRED"/>
+            <tx:method name="insert*" propagation="REQUIRED"/>
+            <tx:method name="update*" propagation="REQUIRED"/>
+            <tx:method name="find*" propagation="SUPPORTS" read-only="true"/>
+            <tx:method name="get*" propagation="SUPPORTS" read-only="true"/>
+            <tx:method name="select*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--AOP-->
+    <aop:config>
+        <!--设置切入点-->
+        <aop:advisor advice-ref="txAdvice" pointcut="execution(* cn.yf.service.impl.*.*(..))"/>
+    </aop:config>
+    <aop:aspectj-autoproxy  proxy-target-class="true"/>
+
+
+</beans>
